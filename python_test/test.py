@@ -9,36 +9,45 @@
 2. Зайти на yandex.ru.
 3. В разделе маркет выбрать Сотовые телефоны.
 4. Зайти в расширенный поиск.
-5. Задать параметр поиска до 20000 рублей и Диагональ экрана от 3 дюймов.
-6. Выбрать не менее 5 любых производителей, среди популярных.
-7. Нажать кнопку Подобрать.
-8. Проверить, что элементов на странице 10.
-9. Запомнить первый элемент в списке.
-10. Изменить Сортировку на другую (популярность или новизна).
-11. Найти и нажать по имени запомненного объекта.
-12. Вывести цифровое значение его оценки.
-13. Закрыть браузер.
+5. Задать параметр поиска до 20000 рублей
+6. Нажать кнопку Подобрать.
 ПРИМЕЧАНИЯ:
 Предполагается полная свобода в действиях. При оценке в обязательном порядке будут учитываться:
 - работоспособность сценария в браузерах Google Chrome и Mozilla Firefox
-- гибкость и адаптивность сценария (насколько просто заменить часть исходных данных, например - города);
 - «живучесть» сценария (обработка ошибок и исключений);
 """
 
 # Решение
 
 from selenium import webdriver
-import time
+
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-geckodriver = "/opt/geckodriver/geckodriver"
+CHROMEDRIVER = r"C:\Selenium\chromedriver\chromedriver.exe"
 
-driver = webdriver.Firefox(executable_path=geckodriver)
-driver.implicitly_wait(10)
-driver.maximize_window()
-wait = WebDriverWait(driver, 10)
 
-driver.get("https://market.yandex.ru/")
-driver.find_element_by_xpath("/html/body/div/div[2]/noindex/ul/li[1]/a").click()
-driver.find_element_by_xpath("//a[contains(.,'Мобильные телефоны')]").click()
+def wait_elem_visible(xpath):
+    element = wait.until(
+        EC.visibility_of_element_located((By.XPATH, xpath)))
+    return element
+
+
+driver = webdriver.Chrome(executable_path=CHROMEDRIVER)
+try:
+    driver.implicitly_wait(10)
+    wait = WebDriverWait(driver, 10)
+    driver.maximize_window()
+    driver.get("https://market.yandex.ru/")
+    driver.find_element_by_xpath("/html/body/div/div[2]/noindex/ul/li[1]/a").click()
+    wait_elem_visible("/html/body/div[1]/div[4]/div[1]/div/div[1]/div/a[1]").click()
+    wait_elem_visible("/html/body/div[1]/div[4]/div[2]/div[2]/div[1]/div/div[38]/div[2]/a").click()
+    # Зададим цену
+    wait_elem_visible('//*[@id="glf-priceto-var"]').send_keys(u"20000")
+    # Нажмем на поиск
+    wait_elem_visible("/html/body/div[1]/div[4]/div/div[1]/div[4]/a[2]").click()
+    # Дождемся результатов поиска
+    wait_elem_visible("/html/body/div[1]/div[4]/div[2]/div[1]/div[2]/div[1]/div[1]/div[3]")
+finally:
+    driver.quit()
